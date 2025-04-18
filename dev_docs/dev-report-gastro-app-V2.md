@@ -1,6 +1,6 @@
 # 🧾 Informe de Desarrollo - gastro-app-V2
 
-## 📌 Descripción General
+## Descripción General
 **gastro-app-V2** es un software administrativo modular para restaurantes, dividido en tres suites funcionales:
 1. **Suite de Punto de Venta (POS)** – Órdenes, menú, reportes.
 2. **Suite Administrativa** – Inventarios, finanzas, personal.
@@ -8,9 +8,9 @@
 
 Cada suite compartirá una base de datos centralizada, y el acceso estará condicionado por el tipo de suscripción o paquete contratado. Actualmente, el desarrollo se centra en la **Suite POS**.
 
-## 🚀 Fase Actual del Desarrollo
+## Fase Actual del Desarrollo
 
-### ✅ Progreso Actual (Suite POS)
+### Progreso Actual (Suite POS)
 - Página principal de órdenes: inicio del sistema de toma y gestión de pedidos.
 - Módulo de menú: con categorías, precios y validaciones.
 - Estructura inicial de reportes y lógica de cálculo de totales.
@@ -33,7 +33,7 @@ Cada suite compartirá una base de datos centralizada, y el acceso estará condi
 | Linter y Prettier | Configurados con ESLint, Prettier                                  |
 | Pruebas           | Reporte de tests incluido                                          |
 
-## 🌳 Estructura Modular de Archivos
+## Estructura Modular de Archivos
 
 gastro-app-V2/
     ├── app/                       # Rutas de página y layout
@@ -72,29 +72,29 @@ gastro-app-V2/
     └── README.md
 
 
-## 🔄 Fases de Desarrollo Sugeridas
+## Fases de Desarrollo Sugeridas
 
-### 🟢 Fase 1: Finalizar MVP POS
+### Fase 1: Finalizar MVP POS
 - Página de historial de órdenes
 - Página de reportes básicos (ventas diarias, totales, por categoría)
 - Mejoras de UX/UI (modal de productos, loading states, validaciones visuales)
 - Añadir persistencia de datos simulada (Firebase u otra adecuada)
 - Integración básica con autenticación (opcional para pruebas)
 
-### 🟠 Fase 2: Módulo Administrativo
+### Fase 2: Módulo Administrativo
 - Diseño de CRUD para inventario
 - Registro de flujo de caja (ingresos/egresos)
 - Gestión de personal (roles, horarios)
 - Permisos por usuario (Admin, Mesero, Cocina)
 - Dashboard de resumen administrativo
 
-### 🔵 Fase 3: Módulo Cocina
+### Fase 3: Módulo Cocina
 - CRUD de recetas (ingredientes, pasos, tiempos)
 - Control de stock técnico (insumos por receta)
 - Temporizador de órdenes en cocina
 - Modo visual de cocina (modo TV o tablet)
 
-### 🧩 Backend & Base de Datos
+### Backend & Base de Datos
 - Selección de base de datos (Firebase Firestore o SQL remoto)
 - Conexión a base de datos y refactorización de lógica
 - Implementación de suscripciones por suite contratada
