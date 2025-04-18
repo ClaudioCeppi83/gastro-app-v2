@@ -17,3 +17,6 @@ export interface MenuSection {
 }
 
 // Removed re-export of Dish to avoid conflicts
+
+// Ensure Dish is exported properly
+export type { Dish } from '../order-system';

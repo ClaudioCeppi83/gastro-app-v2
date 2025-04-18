@@ -8,7 +8,7 @@ const useCategories = () => {
 
   useEffect(() => {
     // In a real application, fetch categories from an API or database
-    // Example: 
+    // Example:
     // const fetchCategories = async () => {
     //   try {
     //     const data = await api.getCategories();
@@ -23,10 +23,10 @@ const useCategories = () => {
 
     // For now, return a static list
     setCategories([
-      { id: '1', name: 'Appetizers' },
-      { id: '2', name: 'Main Courses' },
-      { id: '3', name: 'Desserts' },
-      { id: '4', name: 'Drinks' },
+      { id: '1', name: 'Appetizers', dishes: [] },
+      { id: '2', name: 'Main Courses', dishes: [] },
+      { id: '3', name: 'Desserts', dishes: [] },
+      { id: '4', name: 'Drinks', dishes: [] },
     ]);
     setLoading(false);
   }, []);

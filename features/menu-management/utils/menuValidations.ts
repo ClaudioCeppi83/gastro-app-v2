@@ -1,4 +1,4 @@
-import { Dish } from '../../types';
+import { Dish } from '../../order-system';
 
 export const validateDish = (dish: Dish): string[] => {
   const errors: string[] = [];
