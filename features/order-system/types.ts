@@ -31,4 +31,7 @@ export interface Dish {
   name: string;
   price: number;
   category: string;
+  description: string;
+  isActive: boolean;
+  allergens: string[];
 }

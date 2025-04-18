@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dish } from '../types';
+import { Dish } from '../../order-system/types';
 
 interface DishForm {
   name: string;
