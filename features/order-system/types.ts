@@ -1,10 +1,8 @@
-// Ensure all types are exported properly
-export type Timestamp = {
+export interface Timestamp {
   seconds: number;
   nanoseconds: number;
-};
+}
 
-// Defining OrderItem type
 export interface OrderItem {
   id: string;
   dishId: string;
@@ -12,26 +10,31 @@ export interface OrderItem {
   price: number;
 }
 
-export interface Order {
+export interface BaseOrder {
   id: string;
   tableNumber: number;
+  status: 'PENDING' | 'PAID' | 'CANCELLED';
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
+}
+
+export interface Order extends BaseOrder {
   items: OrderItem[];
   subtotal: number;
   taxes: {
     iva: number;
     service: number;
   };
-  status: 'PENDING' | 'PAID' | 'CANCELLED';
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
 }
+
+export type NewOrder = Partial<Order> & Pick<Order, 'id' | 'tableNumber' | 'status'>;
 
 export interface Dish {
   id: string;
   name: string;
+  description: string;
   price: number;
   category: string;
-  description: string;
   isActive: boolean;
   allergens: string[];
 }

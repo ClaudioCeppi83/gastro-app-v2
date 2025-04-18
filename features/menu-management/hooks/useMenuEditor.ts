@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { Dish } from '../../order-system/types';
+import {
+  createDish as createDishFirestore,
+  updateDish as updateDishFirestore,
+} from '../../../services/firestoreService';
 
 interface DishForm {
   name: string;
@@ -25,20 +29,19 @@ const useMenuEditor = (initialDish?: Dish) => {
   };
 
   const submitForm = async () => {
-    // In a real application, submit the form data to update or create a dish
-    // Example:
-    // try {
-    //   if (initialDish) {
-    //     await api.updateDish({ ...initialDish, ...form });
-    //   } else {
-    //     await api.createDish(form);
-    //   }
-    //   // Handle success (e.g., redirect, show message)
-    // } catch (err: any) {
-    //   // Handle error
-    // }
-    console.log('Form submitted:', form);
-    // Placeholder: In a real app, you'd likely have a success/error state and feedback to the user
+    try {
+      if (initialDish) {
+        await updateDishFirestore(initialDish.id, form);
+        return initialDish.id; // Return the ID of the updated dish
+      } else {
+        const newDishId = await createDishFirestore(form);
+        return newDishId; // Return the ID of the newly created dish
+      }
+    } catch (error: any) {
+      // Handle error appropriately, e.g., re-throw or set an error state
+      console.error("Error submitting form:", error);
+      throw error; 
+    }
   };
 
   return {
