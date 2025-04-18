@@ -15,6 +15,7 @@ const OrderPage: React.FC = () => {
     error: orderError,
     setOrderError,
     getOrderItems,
+    orders,
   } = useOrderContext();
   const [tableNumber, setTableNumber] = useState(0);
   const [orderItems, setOrderItems] = useState<
@@ -29,87 +30,111 @@ const OrderPage: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  // Transform categories and dishes into a list of products
-  const products = categories.flatMap((category) =>
-    category.dishes.map((dish) => ({
-      id: dish.id,
-      name: dish.name,
-      category: category.name,
-      price: dish.price, // Assuming dish has a price property
-    })),
-  );
+  // Memoized products to avoid unnecessary recalculations
+  const products = useMemo(() => {
+    return categories.flatMap((category) =>
+      category.dishes.map((dish) => ({
+        id: dish.id,
+        name: dish.name,
+        category: category.name,
+        price: dish.price,
+      }))
+    );
+  }, [categories]);
 
-  // Fixed the missing `id` property in OrderItem
-  const handleAddItem = async () => {
-    if (orderId && selectedProduct && quantity > 0) {
-      const product = products.find((p) => p.id === selectedProduct);
-      if (product) {
-        try {
-          await addItemToOrder(orderId, {
-            id: `${orderId}-${product.id}`, // Generate a unique ID for the item
-            dishId: product.id,
-            quantity: quantity,
-            price: product.price,
-          });
-          setAddItemError(null); // Clear error on success
+  // Improved error handling in handleAddItem
+  const handleAddItem = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
 
-          // Clear the form after adding
-          setSelectedProduct('');
-          setQuantity(1);
-        } catch (error) {
-          console.error('Error adding item to order:', error);
-          // Handle error appropriately, e.g., display an error message to the user
-        }
-      }
-    } else if (!orderId) {
-      console.warn('Order ID is not set. Please create an order first.');
-      // Optionally, display a message to the user to create an order first
+    if (!orderId) {
+      setAddItemError('Por favor crea una orden primero');
+      return;
+    }
+
+    if (!selectedProduct || quantity <= 0) {
+      setAddItemError('Selecciona un producto y cantidad válida');
+      return;
+    }
+
+    const product = products.find((p) => p.id === selectedProduct);
+    if (!product) {
+      setAddItemError('Producto no encontrado');
+      return;
+    }
+
+    try {
+      await addItemToOrder(orderId, {
+        id: `${orderId}-${product.id}`,
+        dishId: product.id,
+        quantity: quantity,
+        price: product.price,
+      });
+
+      setSelectedProduct('');
+      setQuantity(1);
+      setAddItemError(null);
+    } catch (error) {
+      console.error('Error adding item:', error);
+      setAddItemError('Error al agregar el producto. Intenta nuevamente.');
     }
   };
 
+  // Adjusted useEffect to ensure orderItems sync correctly with orders
   useEffect(() => {
-    const fetchOrderItems = async () => {
-      if (orderId) {
-        try {
-          const items = await getOrderItems(orderId);
-          const itemsWithProductNames = items.map((item) => ({
-            id: item.id,
-            productName: products.find((p) => p.id === item.dishId)?.name || 'Unknown Product',
-            quantity: item.quantity,
-            price: item.price,
-          }));
-          setOrderItems(itemsWithProductNames);
-        } catch (error) {
-          console.error('Error fetching order items:', error);
-          // Handle error appropriately, e.g., display an error message to the user
-        }
-      }
-    };
-    fetchOrderItems();
-  }, [orderId, products]);
+    if (!orderId) return;
 
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+
+    const itemsWithProductNames = order.items.map((item) => ({
+      id: item.id,
+      productName: products.find((p) => p.id === item.dishId)?.name || 'Unknown Product',
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    setOrderItems(itemsWithProductNames);
+  }, [orderId, orders, products]);
+
+  // Updated handleRemoveItem to implement the suggested solution
+  // Fixed ReferenceError by ensuring previousItems is defined in the correct scope
   const handleRemoveItem = async (index: number) => {
-    if (orderId && orderItems && orderItems[index]) {
-      const itemId = orderItems[index].id;
-      setRemoveItemLoading({ ...removeItemLoading, [itemId]: true });
-      try {
-        await removeItemFromOrder(orderId, itemId);
-        // After successful removal from the backend, fetch the updated list of items
-        const updatedItems = await getOrderItems(orderId);
-        setOrderItems(
-          updatedItems.map((item) => ({
-            id: item.id,
-            productName: products.find((p) => p.id === item.dishId)?.name || 'Unknown Product',
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        );
-        setRemoveItemError({ ...removeItemError, [itemId]: null });
-        setRemoveItemLoading({ ...removeItemLoading, [itemId]: false });
-      } catch (error: any) {
-        setRemoveItemError({ ...removeItemError, [itemId]: 'Failed to remove item.' });
-        setRemoveItemLoading({ ...removeItemLoading, [itemId]: false });
-      }
+    if (!orderId || !orderItems?.[index]) return;
+
+    const itemId = orderItems[index].id;
+
+    // Prevent double execution if already loading
+    if (removeItemLoading[itemId]) {
+      console.warn('Remove action already in progress for item:', itemId);
+      return;
+    }
+
+    console.log('Attempting to remove item:', { itemId, index });
+    setRemoveItemLoading((prevLoading) => ({ ...prevLoading, [itemId]: true }));
+
+    // Save the current state in case we need to revert
+    const previousItems = [...orderItems];
+
+    try {
+      // Optimistic update - remove the item locally
+      setOrderItems((prevItems) => prevItems.filter((_, i) => i !== index));
+
+      // Call the API to remove the item
+      await removeItemFromOrder(orderId, itemId);
+
+      // No need to fetch items again, trust the backend operation succeeded
+      setRemoveItemError((prevErrors) => ({ ...prevErrors, [itemId]: null }));
+    } catch (error) {
+      console.error('Error removing item:', error);
+
+      // Revert the state if there is an error
+      setOrderItems(previousItems);
+      setRemoveItemError((prevErrors) => ({ ...prevErrors, [itemId]: 'Failed to remove item.' }));
+    } finally {
+      setRemoveItemLoading((prevLoading) => {
+        console.log('Resetting removeItemLoading for item:', itemId);
+        return { ...prevLoading, [itemId]: false };
+      });
     }
   };
 
@@ -121,16 +146,28 @@ const OrderPage: React.FC = () => {
   }, [orderItems]);
 
   // Updated handleCreateOrder to handle the return type of createOrder properly
+  // Ensure the error message is displayed and dismissible
+  // Added validation to prevent creating an order with tableNumber or personCount as zero
   const handleCreateOrder = async () => {
+    console.log('handleCreateOrder called with tableNumber:', tableNumber);
+
+    if (tableNumber <= 0 || personCount <= 0) {
+      console.error('Invalid table number or person count. Cannot create order.');
+      setOrderError('El número de mesa y la cantidad de personas deben ser mayores a cero.');
+      return;
+    }
+
     try {
       const newOrder = await createOrder(tableNumber);
       if (newOrder && newOrder.id) {
         setOrderId(newOrder.id);
       } else {
         console.error('Order creation failed: Invalid response from createOrder');
+        setOrderError('Failed to create order. Please try again.');
       }
     } catch (error) {
       console.error('Error creating order:', error);
+      setOrderError('Failed to create order. Please try again.');
     }
   };
 
@@ -246,31 +283,18 @@ const OrderPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Producto
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cantidad
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Precio
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50"></th>{' '}
-                  {/* Empty header for the remove button */}
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-6 py-3 bg-gray-50"></th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {orderItems.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.productName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.quantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${item.price.toFixed(2)}
-                    </td>
+                  <tr key={item.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.productName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.quantity}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleRemoveItem(index)}

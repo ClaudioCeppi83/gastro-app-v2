@@ -7,19 +7,29 @@ export const useOrderActions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Updated createOrder to return a valid object with an `id`
+  // Updated createOrder to add the new order to the local state
   const createOrder = async (tableNumber: number): Promise<{ id: string }> => {
-    // Simulate API call or backend logic
-    return { id: `order-${tableNumber}-${Date.now()}` }; // Example implementation
+    const newOrder = { id: `order-${tableNumber}-${Date.now()}`, tableNumber, items: [] };
+    setOrders([...orders, newOrder]);
+    return { id: newOrder.id };
   };
 
+  // Reverted addItemToOrder to its original implementation
   const addItemToOrder = async (orderId: string, item: OrderItem) => {
+    console.log('addItemToOrder called with:', { orderId, item });
     setLoading(true);
     setError(null);
     try {
-      // await OrderService.addItem(orderId, item);
-      // Update local state if needed
-      // setOrders(orders.map(order => order.id === orderId ? { ...order, items: [...order.items, item] } : order));
+      setOrders(
+        orders.map((order) => {
+          if (order.id === orderId) {
+            const updatedOrder = { ...order, items: [...order.items, item] };
+            console.log('Updated order:', updatedOrder);
+            return updatedOrder;
+          }
+          return order;
+        }),
+      );
     } catch (err: any) {
       setError(err.message || 'Failed to add item');
     } finally {
@@ -27,6 +37,7 @@ export const useOrderActions = () => {
     }
   };
 
+  // Reverted removeItemFromOrder to its original implementation
   const removeItemFromOrder = async (orderId: string, itemId: string) => {
     setLoading(true);
     setError(null);
@@ -37,10 +48,11 @@ export const useOrderActions = () => {
             return { ...order, items: order.items.filter((item) => item.id !== itemId) };
           }
           return order;
-        }),
+        })
       );
     } catch (err: any) {
       setError(err.message || 'Failed to remove item');
+      throw err; // Re-throw the error to ensure it propagates
     } finally {
       setLoading(false);
     }
