@@ -63,6 +63,12 @@ export const useOrderActions = () => {
     }
   };
 
+  const setOrderError = (errorMessage: string | null) => {
+    setLoading(false);
+    setError(errorMessage);
+  };
+
+
 
 
 
@@ -76,6 +82,7 @@ export const useOrderActions = () => {
     addItemToOrder,
     getOrderItems,
     removeItemFromOrder,
+    setOrderError,
     // ... other actions
   };
 };

@@ -2,13 +2,17 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import useCategories from '../features/menu-management/hooks/useCategories'; 
+import ErrorMessage from '../components/ErrorMessage';
 import { useOrderContext } from '../features/order-system/providers/OrderProvider';
 
 const OrderPage: React.FC = () => {
   const { categories, loading: loadingMenu, error: menuError } = useCategories();
-  const { createOrder, addItemToOrder, removeItemFromOrder, loading: loadingOrder, error: orderError, getOrderItems } = useOrderContext();
+  const { createOrder, addItemToOrder, removeItemFromOrder, loading: loadingOrder, error: orderError, setOrderError, getOrderItems } = useOrderContext();
   const [tableNumber, setTableNumber] = useState(0);
   const [personCount, setPersonCount] = useState(0);
+  const [addItemError, setAddItemError] = useState<string | null>(null); // Local state for add item errors
+  const [removeItemError, setRemoveItemError] = useState<{ [itemId: string]: string | null }>({}); // Local state for remove item errors
+  const [removeItemLoading, setRemoveItemLoading] = useState<{ [itemId: string]: boolean }>({}); // Local state for remove item loading
 
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -42,7 +46,8 @@ const OrderPage: React.FC = () => {
             quantity: quantity,
             price: product.price,
           });
-
+          setAddItemError(null); // Clear error on success
+          
           // Clear the form after adding
           setSelectedProduct('');
           setQuantity(1);
@@ -51,7 +56,7 @@ const OrderPage: React.FC = () => {
           // Handle error appropriately, e.g., display an error message to the user
         }
       }
-    } else if (!orderId) {
+    } else if (!orderId) {      
       console.warn("Order ID is not set. Please create an order first.");
       // Optionally, display a message to the user to create an order first
     }
@@ -60,15 +65,22 @@ const OrderPage: React.FC = () => {
   const handleRemoveItem = async (index: number) => {
     if (orderId && orderItems[index]) {
       const itemId = orderItems[index].id;
+      setRemoveItemLoading({ ...removeItemLoading, [itemId]: true });
       try {
         await removeItemFromOrder(orderId, itemId);
         // After successful removal from the backend, fetch the updated list of items
         const updatedItems = await getOrderItems(orderId);
         setOrderItems(updatedItems.map(item => ({
           id: item.id,
-          productName: products.find(p => p.id === item.dishId)?.name || 'Unknown Product',
+          productName: products.find(p => p.id === item.dishId)?.name || 'Unknown Product',          
           quantity: item.quantity,
           price: item.price,
+        })));
+        setRemoveItemError({ ...removeItemError, [itemId]: null });
+        setRemoveItemLoading({ ...removeItemLoading, [itemId]: false });
+      } catch (error: any) {
+        setRemoveItemError({ ...removeItemError, [itemId]: "Failed to remove item." });
+        setRemoveItemLoading({ ...removeItemLoading, [itemId]: false });
         })));
       } catch (error) {
         console.error("Error removing item from order:", error);
@@ -98,8 +110,9 @@ const OrderPage: React.FC = () => {
           price: item.price,
         })));
       }
-    } catch (error) {
-      console.error("Error creating or fetching order:", error);
+    } catch (error: any) {
+      console.error("Error creating order:", error);
+      setOrderError("Failed to create order. Please try again.");
     };
   };
 
@@ -219,8 +232,15 @@ const OrderPage: React.FC = () => {
                                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.quantity}</td>
                                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
                                                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                      <button onClick={() => handleRemoveItem(index)} className="text-indigo-600 hover:text-indigo-900">Eliminar</button>
-                                                  </td>                                                  
+                                                      <button 
+                                                        onClick={() => handleRemoveItem(index)} 
+                                                        className="text-indigo-600 hover:text-indigo-900"
+                                                        disabled={removeItemLoading[item.id]}
+                                                      >
+                                                        {removeItemLoading[item.id] ? 'Eliminando...' : 'Eliminar'}
+                                                      {removeItemError[item.id] && (
+                                                        <ErrorMessage errorMessage={removeItemError[item.id]} />                                                      )}
+                                                  </td>
                                               </tr>
                                           ))}
                                           </tbody>
@@ -252,8 +272,14 @@ const OrderPage: React.FC = () => {
                       <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">Cantidad</label>
                       <input type="number" id="quantity" name="quantity" min="1" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value, 10))} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
                     </div>
-                    <button onClick={handleAddItem} className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50" disabled={!orderId}>Agregar</button>
-                  </>
+                    <button 
+                      onClick={handleAddItem} 
+                      className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50" 
+                      disabled={!orderId || loadingOrder}
+                    >{loadingOrder ? 'Agregando...' : 'Agregar'}</button>
+                    {addItemError && (                      
+                      <ErrorMessage errorMessage={addItemError} />                    )}
+                    </>
                 )}
             )}
           </section>
@@ -261,7 +287,8 @@ const OrderPage: React.FC = () => {
           {/* Resumen de orden */}
           <section aria-labelledby="order-summary-heading">
             <h2 id="order-summary-heading" className="text-lg font-semibold mb-2">Resumen</h2>
-            <dl className="space-y-2">              
+            <ErrorMessage errorMessage={orderError} onDismiss={() => setOrderError(null)} />
+
               <div>
                 <dt className="text-gray-700">Mesa:</dt><dd className="font-medium">{tableNumber}</dd>
               </div>
@@ -278,7 +305,7 @@ const OrderPage: React.FC = () => {
               <button onClick={handleCreateOrder} disabled={loadingOrder} className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
               >
                   {loadingOrder ? 'Creando...' : 'Crear Orden'}
-              </button>
+              </button>              
               
             </dl>
           </section>
