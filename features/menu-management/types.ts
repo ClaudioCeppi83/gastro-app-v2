@@ -1,7 +1,4 @@
-// Removed local declaration of Dish and relied on imported type
-import { OrderItem, Dish } from '../order-system'; // Simplified path
-
-// Removed local declaration of Dish
+import { Dish } from '../order-system/types';
 
 export interface Category {
   id: string;
@@ -15,8 +12,3 @@ export interface MenuSection {
   name: string;
   categories: Category[];
 }
-
-// Removed re-export of Dish to avoid conflicts
-
-// Ensure Dish is exported properly
-export type { Dish } from '../order-system';

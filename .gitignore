@@ -49,8 +49,10 @@ public/static/thumbs/
 public/.cache/
 
 # Next.js default ignores
+.next
 .next/*
 !.next/cache/ # (puede necesitarse para CI/CD)
+*.config.js
 
 # Si se usa servicios serverless
 .serverless/ # archivo futuro

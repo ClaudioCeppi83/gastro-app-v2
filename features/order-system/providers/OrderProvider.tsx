@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState } from 'react';
 import { useOrderActions } from '../hooks/useOrderActions';
@@ -19,21 +19,16 @@ interface OrderContextType {
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { orders, loading, error, createOrder, addItemToOrder } = useOrderActions();
-
-  const [orderError, setOrderError] = useState<string | null>(null);
-
-  const removeItemFromOrder = async (orderId: string, itemId: string) => {
-    // Implement the logic to remove an item from an order
-    console.log(`Removing item ${itemId} from order ${orderId}`);
-    // Add actual implementation here
-  };
-
-  const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
-    // Implement the logic to fetch order items
-    console.log(`Fetching items for order ${orderId}`);
-    return []; // Replace with actual implementation
-  };
+  const {
+    orders,
+    loading,
+    error,
+    createOrder,
+    addItemToOrder,
+    removeItemFromOrder,
+    getOrderItems,
+    setOrderError,
+  } = useOrderActions();
 
   const value: OrderContextType = {
     orders,
@@ -47,11 +42,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // ... other actions
   };
 
-  return (
-    <OrderContext.Provider value={value}>
-      {children}
-    </OrderContext.Provider>
-  );
+  return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };
 
 export const useOrderContext = () => {

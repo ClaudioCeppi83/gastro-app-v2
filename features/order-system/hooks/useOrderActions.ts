@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Order, OrderItem } from '../types';
-// Assume OrderService is defined elsewhere and handles API calls
+import { Dish } from '../types';
 // import { OrderService } from '../../services/orders';
-
 export const useOrderActions = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,29 +27,34 @@ export const useOrderActions = () => {
     }
   };
 
-  const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
+  const removeItemFromOrder = async (orderId: string, itemId: string) => {
     setLoading(true);
     setError(null);
     try {
-      // const items = await OrderService.getItems(orderId);
-      // return items;
-      return []; // Return an empty array for now since OrderService is not implemented
+      setOrders(
+        orders.map((order) => {
+          if (order.id === orderId) {
+            return { ...order, items: order.items.filter((item) => item.id !== itemId) };
+          }
+          return order;
+        }),
+      );
     } catch (err: any) {
-      setError(err.message || 'Failed to get order items');
-      return []; // Return an empty array in case of error
+      setError(err.message || 'Failed to remove item');
     } finally {
       setLoading(false);
     }
   };
 
-  const removeItemFromOrder = async (orderId: string, itemId: string) => {
+  const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
     setLoading(true);
     setError(null);
     try {
-      // await OrderService.removeItem(orderId, itemId);
-      // Update local state if needed, or refetch the order
+      const order = orders.find((o) => o.id === orderId);
+      return order ? order.items : [];
     } catch (err: any) {
-      setError(err.message || 'Failed to remove item');
+      setError(err.message || 'Failed to get order items');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -60,10 +64,6 @@ export const useOrderActions = () => {
     setLoading(false);
     setError(errorMessage);
   };
-
-
-
-
 
   // Implement other CRUD actions like updateOrder, deleteOrder, getOrders...
 
