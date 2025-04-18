@@ -1,4 +1,43 @@
+# Archivos base
 node_modules/
 .DS_Store
 .env
+.env.local
+.env.development
+.env.test
+.env.production
 *.log
+*.pem
+
+# Dependencias y builds
+.cache/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Editor/IDE
+.idea/
+.vscode/ # (excepto settings.json si quieres compartir configs del equipo)
+*.swp
+*.swo
+
+# Testing
+coverage/ # archivo futuro
+.nyc_output/ # archivo futuro
+
+# Misceláneos
+npm-debug.log* 
+yarn-debug.log* 
+yarn-error.log* 
+*.bak 
+*.tmp 
+
+# Archivos específicos de sistemas operativos
+Thumbs.db 
+ehthumbs.db 
+Desktop.ini 
+
+# Archivos de desarrollo local
+/.idx/ # (a menos que sea necesario para el equipo)
+node_modules
