@@ -35,13 +35,14 @@ const OrderPage: React.FC = () => {
     }))
   );
 
+  // Fixed the missing `id` property in OrderItem
   const handleAddItem = async () => {
     if (orderId && selectedProduct && quantity > 0) {
       const product = products.find(p => p.id === selectedProduct);
-      if (product && product.id) { // Ensure product and product.id are valid
+      if (product) {
         try {
-          // Call addItemToOrder to add the item to the backend order
           await addItemToOrder(orderId, {
+            id: `${orderId}-${product.id}`, // Generate a unique ID for the item
             dishId: product.id,
             quantity: quantity,
             price: product.price,
@@ -92,23 +93,17 @@ const OrderPage: React.FC = () => {
     return { subtotal, iva, total: subtotal + iva };
   }, [orderItems]);
 
+  // Updated handleCreateOrder to handle the return type of createOrder properly
   const handleCreateOrder = async () => {
     try {
       const newOrder = await createOrder(tableNumber);
-      setOrderId(newOrder.id);
-      // Fetch order items immediately after creating the order
-      if (newOrder.id) {
-        const items = await getOrderItems(newOrder.id);
-        setOrderItems(items.map(item => ({
-          id: item.id,
-          productName: products.find(p => p.id === item.dishId)?.name || 'Unknown Product',
-          quantity: item.quantity,
-          price: item.price,
-        })));
+      if (newOrder && newOrder.id) {
+        setOrderId(newOrder.id);
+      } else {
+        console.error('Order creation failed: Invalid response from createOrder');
       }
-    } catch (error: any) {
-      console.error("Error creating order:", error);
-      setOrderError("Failed to create order. Please try again.");
+    } catch (error) {
+      console.error('Error creating order:', error);
     }
   };
 

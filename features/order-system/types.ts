@@ -1,6 +1,12 @@
-import { Timestamp } from 'firebase/firestore';
+// Ensure all types are exported properly
+export type Timestamp = {
+  seconds: number;
+  nanoseconds: number;
+};
 
+// Defining OrderItem type
 export interface OrderItem {
+  id: string;
   dishId: string;
   quantity: number;
   price: number;

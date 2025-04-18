@@ -1,24 +1,17 @@
 import { useState } from 'react';
 import { Order, OrderItem } from '../types';
 // Assume OrderService is defined elsewhere and handles API calls
-// import { OrderService } from '../../services/orders'; 
+// import { OrderService } from '../../services/orders';
 
 export const useOrderActions = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createOrder = async (tableNumber: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // const newOrder = await OrderService.create({ tableNumber, items: [] });
-      // setOrders([...orders, newOrder]);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create order');
-    } finally {
-      setLoading(false);
-    }
+  // Updated createOrder to return a valid object with an `id`
+  const createOrder = async (tableNumber: number): Promise<{ id: string }> => {
+    // Simulate API call or backend logic
+    return { id: `order-${tableNumber}-${Date.now()}` }; // Example implementation
   };
 
   const addItemToOrder = async (orderId: string, item: OrderItem) => {
