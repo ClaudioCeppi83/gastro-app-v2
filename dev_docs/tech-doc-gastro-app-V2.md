@@ -1,4 +1,4 @@
-# 📘 Documentación Técnica — gastro-app-V2
+# Documentación Técnica — gastro-app-V2
 
 ## Nombre del Proyecto
 **gastro-app-V2** — Sistema Administrativo para Restaurantes
@@ -95,7 +95,7 @@ export interface Order {
 - Redirecciones condicionales por suite contratada.
 
 
-## 🔮 Roadmap Técnico
+## Roadmap Técnico
 
 | Fase         | Objetivo                                  | Estado           |
 |--------------|-------------------------------------------|------------------|
@@ -106,7 +106,7 @@ export interface Order {
 | Suite Cocina | Recetas, tiempos, stock cocina            | 🔲 En planeación |
 | Deploy       | Firebase Hosting, Vercel                  | 🔲 Fase final    |
 
-## 📬 Notas de Implementación
+## Notas de Implementación
 
 - Evitar lógica duplicada: mantener reutilización en utils/ y hooks/.
 - Todo el estado debe escalar desde providers/.
