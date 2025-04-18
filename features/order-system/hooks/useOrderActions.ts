@@ -9,7 +9,18 @@ export const useOrderActions = () => {
 
   // Updated createOrder to add the new order to the local state
   const createOrder = async (tableNumber: number): Promise<{ id: string }> => {
-    const newOrder = { id: `order-${tableNumber}-${Date.now()}`, tableNumber, items: [] };
+    const now = Math.floor(Date.now() / 1000);
+    const newOrder: Order = {
+      id: `order-${tableNumber}-${Date.now()}`,
+      tableNumber,
+      items: [],
+      subtotal: 0,
+      taxes: { iva: 0, service: 0 },
+      status: 'PENDING',
+      createdAt: { seconds: now, nanoseconds: 0 },
+      updatedAt: { seconds: now, nanoseconds: 0 },
+    };
+
     setOrders([...orders, newOrder]);
     return { id: newOrder.id };
   };
