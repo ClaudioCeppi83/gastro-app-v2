@@ -25,6 +25,8 @@ dist/
 # Testing
 coverage/ # archivo futuro
 .nyc_output/ # archivo futuro
+jest-test-results.json # archivo futuro
+*.snap # archivo futuro
 
 # Misceláneos
 npm-debug.log* 
@@ -41,3 +43,15 @@ Desktop.ini
 # Archivos de desarrollo local
 /.idx/ # (a menos que sea necesario para el equipo)
 node_modules
+
+# No las ignora completamente, pero considera ignorar archivos generados
+public/static/thumbs/
+public/.cache/
+
+# Next.js default ignores
+.next/*
+!.next/cache/ # (puede necesitarse para CI/CD)
+
+# Si se usa servicios serverless
+.serverless/ # archivo futuro
+.serverless_nextjs/ # archivo futuro
