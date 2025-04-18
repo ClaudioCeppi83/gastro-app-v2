@@ -1,12 +1,12 @@
 # 📘 Documentación Técnica — gastro-app-V2
 
-## 🏷️ Nombre del Proyecto
+## Nombre del Proyecto
 **gastro-app-V2** — Sistema Administrativo para Restaurantes
 
-## 🎯 Objetivo del Proyecto
+## Objetivo del Proyecto
 Desarrollar un software administrativo de restaurante que permita digitalizar y automatizar procesos claves como la toma de órdenes, gestión del menú, reportes de ventas, inventarios, personal y operaciones de cocina. Se ofrecerá en forma de suites independientes, accesibles según suscripción, pero sobre una base de datos común.
 
-## 🧩 Arquitectura General
+## Arquitectura General
 
 Frontend (Next.js + React + TS)
          |
@@ -16,7 +16,7 @@ Frontend (Next.js + React + TS)
          |
  Base de datos compartida (planeada)
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Categoría            | Tecnología                                  |
 |----------------------|---------------------------------------------|
@@ -30,7 +30,7 @@ Frontend (Next.js + React + TS)
 | Base de Datos        | 🔜 Firebase Firestore (a definir)           |
 | Control de versiones | Git + GitHub                                |
 
-## 🧱 Estructura de Carpetas
+## Estructura de Carpetas
 
 gastro-app-V2/
 ├── app/                  # Rutas principales del sistema
@@ -45,7 +45,7 @@ gastro-app-V2/
 ├── .idx/                 # Firebase Studio configs
 └── public/               # Recursos públicos (próximo)
 
-## 📦 Módulos Principales
+## Módulos Principales
 
 ### 1. Order System
 + Funciones: Crear y gestionar órdenes, calcular totales, aplicar validaciones.
@@ -58,7 +58,7 @@ gastro-app-V2/
 - Hooks: `useCategories` (Gestión de categorías.), `useMenuEditor` (Edición y validación de productos.).
 - Utils: `menuValidations`, `priceCalculations`
 
-## 📃 Tipado Global
+## Tipado Global
 
 Ejemplo: Order.ts
 ```
@@ -78,7 +78,7 @@ export interface Order {
 }
 ```
 
-## 📈 Pruebas y Validaciones
+## Pruebas y Validaciones
 
 ### Actualmente hay una sección de testing manual:
 - testing/test_report.md (Informe inicial de pruebas manuales.).
@@ -88,7 +88,7 @@ export interface Order {
 - Validación de formularios con Zod o Yup.
 - Mock de base de datos para testeo.
 
-## 🔒 Autenticación (Futura)
+## Autenticación (Futura)
 
 - Firebase Auth con roles (`admin`, `mesero`, `cocinero`)
 - Middleware y rutas protegidas
