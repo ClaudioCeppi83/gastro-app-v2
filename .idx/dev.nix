@@ -1,63 +1,52 @@
 # To learn more about how to use Nix to configure your environment
 # see: https://firebase.google.com/docs/studio/customize-workspace
-{ pkgs, ... }: {
+{ ... }: {
   # Which nixpkgs channel to use.
   channel = "stable-24.05"; # or "unstable"
-  
-  # Paquetes añadidos (conservando los comentarios existentes)
+  # Use https://search.nixos.org/packages to find packages
   packages = [
     # pkgs.go
     # pkgs.python311
     # pkgs.python311Packages.pip
-    pkgs.nodejs_20  # Descomentado y necesario para Firebase
+    # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
-    pkgs.jdk17  # Java necesario para los emuladores
-    pkgs.firebase-tools  # CLI de Firebase
   ];
-
-  # Variables de entorno añadidas (manteniendo estructura vacía original)
-  env = {
-    JAVA_HOME = "${pkgs.jdk17}";
-    FIRESTORE_EMULATOR_HOST = "localhost:8080";
-    FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
-  };
-
-  # Configuración IDX existente con pequeñas adiciones
+  # Sets environment variables in the workspace
+  env = {};
   idx = {
-    # Extensiones recomendadas para Firebase
+    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
       # "vscodevim.vim"
-      "firebase.firebase-vscode"  # Extensión oficial de Firebase
-      "dbaeumer.vscode-eslint"    # Para linting
     ];
-
-    # Previews manteniendo estructura original
+    # Enable previews
     previews = {
       enable = true;
       previews = {
         # web = {
+        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
+        #   # and show it in IDX's web preview panel
         #   command = ["npm" "run" "dev"];
         #   manager = "web";
         #   env = {
+        #     # Environment variables to set for your server
         #     PORT = "$PORT";
         #   };
         # };
-        emulators = {
-          command = ["firebase" "emulators:start"];
-          manager = "terminal";
-        };
       };
     };
-
-    # Workspace hooks con añadidos para Firebase
+    # Workspace lifecycle hooks
     workspace = {
+      # Runs when a workspace is first created
       onCreate = {
-        npm-install = "npm install";
-        # firebase-setup = "firebase setup:emulators:firestore";  # Commented out to avoid potential issues
+        # Example: install JS dependencies from NPM
+        # npm-install = "npm install";
+        # Open editors for the following files by default, if they exist:
         default.openFiles = [ ".idx/dev.nix" "README.md" ];
       };
+      # Runs when the workspace is (re)started
       onStart = {
-        # start-emulators = "firebase emulators:start";  # Commented out to avoid potential issues
+        # Example: start a background task to watch and re-build backend code
+        # watch-backend = "npm run watch-backend";
       };
     };
   };
