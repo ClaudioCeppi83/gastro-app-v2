@@ -53,11 +53,11 @@
     workspace = {
       onCreate = {
         npm-install = "npm install";
-        firebase-setup = "firebase setup:emulators:firestore";
+        # firebase-setup = "firebase setup:emulators:firestore";  # Commented out to avoid potential issues
         default.openFiles = [ ".idx/dev.nix" "README.md" ];
       };
       onStart = {
-        start-emulators = "firebase emulators:start";
+        # start-emulators = "firebase emulators:start";  # Commented out to avoid potential issues
       };
     };
   };
