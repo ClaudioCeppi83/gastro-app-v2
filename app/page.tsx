@@ -1,22 +1,28 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import useCategories from '../features/menu-management/hooks/useCategories';
 import ErrorMessage from '../components/ErrorMessage';
 import { useOrderContext } from '../features/order-system/providers/OrderProvider';
+import MenuDisplay from '../features/menu-management/components/MenuDisplay';
+import useCategories from '../features/menu-management/hooks/useCategories';
+import OrderActions from '../features/order-system/components/OrderActions';
+import { Dish } from '../features/order-system/types';
+import OrderSummary from '../features/order-system/components/OrderSummary'; // Import OrderSummary
 
 const OrderPage: React.FC = () => {
   const { categories, loading: loadingMenu, error: menuError } = useCategories();
   const {
     createOrder,
     addItemToOrder,
-    removeItemFromOrder,
+    removeItemFromOrder,    
     loading: loadingOrder,
     error: orderError,
     setOrderError,
     getOrderItems,
     orders,
-  } = useOrderContext();
+    getOrderFirestore,
+    updateOrderFirestore,
+  } = useOrderContext();  
   const [tableNumber, setTableNumber] = useState(0);
   const [orderItems, setOrderItems] = useState<
     { id: string; productName: string; quantity: number; price: number }[]
@@ -29,6 +35,7 @@ const OrderPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
 
   // Memoized products to avoid unnecessary recalculations
   const products = useMemo(() => {
@@ -63,7 +70,7 @@ const OrderPage: React.FC = () => {
     }
 
     try {
-      await addItemToOrder(orderId, {
+      await addItemToOrder(orderId, {        
         id: `${orderId}-${product.id}`,
         dishId: product.id,
         quantity: quantity,
@@ -171,6 +178,42 @@ const OrderPage: React.FC = () => {
     }
   };
 
+  const handleAddItemFromMenu = (dish: Dish) => {
+    setSelectedProduct(dish.id);
+    // Since the quantity is always 1 when adding from the menu, we directly call handleAddItem
+    // You might need to adjust this if you want to support different quantities from the menu
+    handleAddItem({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!orderId) {
+      setOrderError('No order to submit.');
+      return;
+    }
+
+    setSubmittingOrder(true);
+    try {
+      const order = await getOrderFirestore(orderId);
+      if (order) {
+        const updatedOrder = {
+          ...order,
+          status: 'SUBMITTED',
+        };
+        await updateOrderFirestore(orderId, updatedOrder);
+        // Optionally, you can clear the orderId and orderItems after successful submission
+        // setOrderId(null);
+        // setOrderItems([]);
+      } else {
+        setOrderError('Order not found.');
+      }
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      setOrderError('Failed to submit order. Please try again.');
+    } finally {
+      setSubmittingOrder(false);
+    }
+  };
+
   return (
     <main className="container mx-auto p-4">
       {/* Logo and Navigation */}
@@ -205,6 +248,14 @@ const OrderPage: React.FC = () => {
           </menu>
         </nav>
       </header>
+
+      {loadingMenu ? (
+        <p>Loading menu...</p>
+      ) : menuError ? (
+        <ErrorMessage errorMessage={`Error loading menu: ${menuError}`} />
+      ) : (
+        <MenuDisplay categories={categories} onAddItem={handleAddItemFromMenu} />
+      )}
 
       <section className="grid grid-cols-2 gap-4">
         {/* Configuración de mesa */}
@@ -272,47 +323,13 @@ const OrderPage: React.FC = () => {
           </form>
         </section>
 
-        {/* Orden actual */}
-        <section aria-labelledby="current-order-heading">
-          <h2 id="current-order-heading" className="text-lg font-semibold mb-2">
-            Orden Actual
-          </h2>
-          {orderItems.length === 0 ? (
-            <p>No items yet.</p>
-          ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                  <th className="px-6 py-3 bg-gray-50"></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orderItems.map((item, index) => (
-                  <tr key={item.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.productName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleRemoveItem(index)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                        disabled={removeItemLoading[item.id]}
-                      >
-                        {removeItemLoading[item.id] ? 'Eliminando...' : 'Eliminar'}
-                      </button>
-                      {removeItemError[item.id] && (
-                        <ErrorMessage errorMessage={removeItemError[item.id]} />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+        {/* Order Summary */}
+        <OrderSummary
+          orderItems={orderItems}
+          onRemoveItem={handleRemoveItem}
+          removeItemLoading={removeItemLoading}
+          removeItemError={removeItemError}
+        />
 
         {/* Agregar productos */}
         <section>
@@ -360,7 +377,7 @@ const OrderPage: React.FC = () => {
                   </div>
                   <button
                     onClick={handleAddItem}
-                    className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                    className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"                    
                     disabled={!orderId || loadingOrder}
                   >
                     {loadingOrder ? 'Agregando...' : 'Agregar'}
@@ -412,6 +429,12 @@ const OrderPage: React.FC = () => {
             </button>
           </dl>
         </section>
+
+        {/* Order Actions */}
+        <OrderActions
+          onSubmitOrder={handleSubmitOrder}
+          loading={submittingOrder}
+        />
       </section>
     </main>
   );

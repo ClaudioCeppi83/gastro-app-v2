@@ -13,7 +13,7 @@ export interface OrderItem {
 export interface BaseOrder {
   id: string;
   tableNumber: number;
-  status: 'PENDING' | 'PAID' | 'CANCELLED';
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'SUBMITTED';
   createdAt: Date | Timestamp;
   updatedAt: Date | Timestamp;
 }
