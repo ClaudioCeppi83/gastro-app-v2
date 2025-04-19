@@ -2,46 +2,49 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { useOrderActions } from '../hooks/useOrderActions';
-import { Order, OrderItem } from '../types'; // Assuming Order type is defined
+import { Order, OrderItem } from '../types';
 
 interface OrderContextType {
   orders: Order[];
   loading: boolean;
-  error: string | null;
-  createOrder: (tableNumber: number) => Promise<{ id: string }>; // Updated to match the implementation
-  addItemToOrder: (orderId: string, item: OrderItem) => Promise<void>;
-  removeItemFromOrder: (orderId: string, itemId: string) => Promise<void>;
+    error: string | null;
+    createOrder: (tableNumber: number) => Promise<{ id: string }>;
+    addItemToOrder: (orderId: string, item: OrderItem) => Promise<Order>;
+    removeItemFromOrder: (orderId: string, itemId: string) => Promise<Order>;
   setOrderError: (error: string | null) => void;
   getOrderItems: (orderId: string) => Promise<OrderItem[]>;
-  // Add other actions as needed
+  getOrderFirestore: (orderId: string) => Promise<Order | undefined>;
+  updateOrderFirestore: (orderId: string, orderData: Partial<Order>) => Promise<void>;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const {
-    orders,
-    loading,
-    error,
-    createOrder,
-    addItemToOrder,
-    removeItemFromOrder,
-    getOrderItems,
-    setOrderError,
-  } = useOrderActions();
+    const {
+      orders,
+      loading,
+      error,
+      setOrderError,
+      createOrder,
+      addItemToOrder,
+      removeItemFromOrder,
+      getOrderItems,
+      getOrderFirestore,
+      updateOrderFirestore,
+    } = useOrderActions();
 
   const value: OrderContextType = {
-    orders,
+    orders: orders || [],
     loading,
     error,
-    createOrder,
-    addItemToOrder,
-    removeItemFromOrder,
     setOrderError,
+    createOrder,
+    addItemToOrder: addItemToOrder,
+    removeItemFromOrder,
     getOrderItems,
-    // ... other actions
+    getOrderFirestore,
+    updateOrderFirestore,
   };
-
   return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };
 

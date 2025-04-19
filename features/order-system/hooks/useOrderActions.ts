@@ -7,6 +7,7 @@ import {
 } from '../../../services/firestoreService';
 
 export const useOrderActions = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,6 +94,41 @@ export const useOrderActions = () => {
     }
   };
 
+  const setOrderError = (error: string | null) => {
+    setError(error);
+  };
+
+  const getOrderFirestore = async (orderId: string): Promise<Order | undefined> => {
+    try {
+      setLoading(true);
+      // Replace this with your actual Firestore logic to fetch an order
+      // Example:
+      // const orderDoc = await getDoc(doc(db, "orders", orderId));
+      // if (orderDoc.exists()) {
+      //   return { id: orderDoc.id, ...orderDoc.data() } as Order;
+      // } else {
+      //   return undefined;
+      // }
+      return undefined; // Placeholder
+    } catch (err: unknown) {
+      setError('Error al obtener la orden');
+      return undefined;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderFirestore = async (orderId: string, orderData: Partial<Order>): Promise<void> => {
+    try {
+      setLoading(true);
+      // Replace this with your actual Firestore logic to update the order
+      // Example: await updateDoc(doc(db, "orders", orderId), orderData);
+    } catch (err: unknown) {
+      setError('Error al actualizar la orden');
+    } finally {
+      setLoading(false);
+    }
+  };
   const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
     try {
       const order = await getOrderFirestore(orderId) as Order | null;
@@ -105,11 +141,15 @@ export const useOrderActions = () => {
   };
 
   return {
+    orders,
     loading,
     error,
+    setOrderError,
     createOrder,
     addItemToOrder,
-    getOrderItems,
     removeItemFromOrder,
+    getOrderItems,
+    getOrderFirestore,
+    updateOrderFirestore,
   };
 };

@@ -197,7 +197,7 @@ const OrderPage: React.FC = () => {
       if (order) {
         const updatedOrder = {
           ...order,
-          status: 'SUBMITTED',
+          status: 'SUBMITTED' as 'PENDING' | 'PAID' | 'CANCELLED' | 'SUBMITTED',
         };
         await updateOrderFirestore(orderId, updatedOrder);
         // Optionally, you can clear the orderId and orderItems after successful submission

@@ -10,10 +10,12 @@ export interface OrderItem {
   price: number;
 }
 
+export type OrderStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'SUBMITTED';
+
 export interface BaseOrder {
   id: string;
   tableNumber: number;
-  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'SUBMITTED';
+  status: OrderStatus;
   createdAt: Date | Timestamp;
   updatedAt: Date | Timestamp;
 }
