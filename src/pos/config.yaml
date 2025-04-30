@@ -1,4 +1,4 @@
-# Configuración API n8n
+# Configuración API GastroFlow
 api:
   endpoints:
     ordenes: https://api.n8n.example.com/v1/ordenes

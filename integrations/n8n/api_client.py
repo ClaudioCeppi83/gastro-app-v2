@@ -21,7 +21,7 @@ class APIClient:
         payload = {
             'iss': self.client_id,
             'exp': time.time() + 3600,
-            'aud': 'n8n-api'
+            'aud': 'api-gateway'
         }
         self._token = jwt.encode(payload, self.secret, algorithm='HS256')
         self._token_exp = payload['exp']

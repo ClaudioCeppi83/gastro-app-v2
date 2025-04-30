@@ -1,4 +1,4 @@
-# Esquema de Integración n8n
+# Esquema de Integración GastroFlow
 
 ## Endpoints principales
 - `POST /v1/ordenes`: Creación de órdenes

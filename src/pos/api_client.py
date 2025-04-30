@@ -3,6 +3,8 @@ import os
 import yaml
 import redis
 import json
+import jwt
+import time
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import logging
@@ -42,11 +44,16 @@ class OrderSchema(BaseModel):
     direccion: Optional[str] = None
 
 class APIClient:
-    def __init__(self, base_url, api_key, timeout=5):
+    def __init__(self, base_url, client_id, secret, timeout=5):
         self.base_url = base_url
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.headers.update({'Authorization': f'Bearer {api_key}'})
+        self.client_id = client_id
+        self.secret = secret
+        self._token = None
+        self._token_exp = 0
+        token = self._get_auth_token()
+        self.session.headers.update({'Authorization': f'Bearer {token}'})
         
         # Configurar retry logic
         retry_strategy = Retry(
@@ -74,6 +81,19 @@ class APIClient:
             decode_responses=True
         )
         self.redis_queue = redis_config['queues']['ordenes']
+
+    def _get_auth_token(self):
+        if time.time() < self._token_exp - 60:
+            return self._token
+        
+        payload = {
+            'iss': self.client_id,
+            'exp': time.time() + 3600,
+            'aud': 'api-gateway'
+        }
+        self._token = jwt.encode(payload, self.secret, algorithm='HS256')
+        self._token_exp = payload['exp']
+        return self._token
 
     def post_order(self, order_data):
         # Validación de schema
