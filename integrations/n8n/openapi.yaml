@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: API de Integración POS-n8n
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /ordenes:
+    post:
+      summary: Crear nueva orden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Orden'
+      responses:
+        '201':
+          description: Orden creada
+components:
+  schemas:
+    Orden:
+      type: object
+      properties:
+        id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemOrden'
+    ItemOrden:
+      type: object
+      properties:
+        producto_id: {type: string}
+        cantidad: {type: integer}

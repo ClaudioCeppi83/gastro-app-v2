@@ -1,0 +1,40 @@
+# Configuración API n8n
+api:
+  endpoints:
+    ordenes: https://api.n8n.example.com/v1/ordenes
+    inventario: https://api.n8n.example.com/v1/inventario
+
+  credentials:
+    client_id: '{{N8N_CLIENT_ID}}'
+    client_secret: '{{N8N_CLIENT_SECRET}}'
+
+# Configuración de logging
+error_handling:
+  api_errors:
+    - code: 1001
+      type: authentication_error
+      message: Fallo de autenticación con API externa
+      retry: true
+    - code: 1002
+      type: rate_limit_exceeded
+      message: Límite de solicitudes excedido
+      retry_after: 300
+    - code: 1003
+      type: timeout_error
+      message: Tiempo de espera agotado
+      retry_count: 3
+
+retry_config:
+  max_attempts: 3
+  backoff_factor: 1.5
+  status_codes:
+    - 500
+    - 502
+    - 503
+    - 504
+    - 429
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: pos.log
