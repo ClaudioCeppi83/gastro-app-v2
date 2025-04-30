@@ -8,6 +8,8 @@ api:
     client_id: '{{N8N_CLIENT_ID}}'
     client_secret: '{{N8N_CLIENT_SECRET}}'
 
+  timeout: 5  # Tiempo máximo en segundos
+
 # Configuración de logging
 error_handling:
   api_errors:
@@ -33,6 +35,17 @@ retry_config:
     - 503
     - 504
     - 429
+
+redis:
+  host: {{REDIS_HOST}}
+  port: 6379
+  queues:
+    ordenes: gastroapp_orders
+    notificaciones: gastroapp_notifications
+  timeouts:
+    procesamiento: 300  # 5 minutos
+    reintento: 60      # 1 minuto
+  max_connections: 20
 
 logging:
   level: INFO
