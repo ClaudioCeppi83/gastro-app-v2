@@ -18,7 +18,7 @@ dist/
 
 # Editor/IDE
 .idea/
-.vscode/ # (excepto settings.json si quieres compartir configs del equipo)
+# .vscode/ # (excepto settings.json si quieres compartir configs del equipo)
 *.swp
 *.swo
 
@@ -50,10 +50,20 @@ public/.cache/
 
 # Next.js default ignores
 .next
-.next/*
+# .next/*
 !.next/cache/ # (puede necesitarse para CI/CD)
 *.config.js
 
 # Si se usa servicios serverless
 .serverless/ # archivo futuro
 .serverless_nextjs/ # archivo futuro
+
+# Archivos de bases de datos locales
+*.sqlite
+*.db
+
+# Archivos de lock alternativos
+# yarn.lock
+
+# Directorios de documentación generada
+/docs/
