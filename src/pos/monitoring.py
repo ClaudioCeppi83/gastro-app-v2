@@ -22,10 +22,15 @@ class MonitoringDashboard:
         
     def get_queue_metrics(self) -> Dict[str, Any]:
         try:
+            redis_info = self.redis.info('memory')
             return {
                 'ordenes_pendientes': self.redis.llen('gastroflow_orders'),
                 'notificaciones_pendientes': self.redis.llen('gastroflow_notifications'),
-                'tiempo_promedio': self.redis.get('metrics:avg_processing_time') or 0
+                'tiempo_promedio': self.redis.get('metrics:avg_processing_time') or 0,
+                'memoria_redis': {
+                    'used_memory': redis_info['used_memory'],
+                    'used_memory_peak': redis_info['used_memory_peak']
+                }
             }
         except Exception as e:
             self.logger.error(f"Error obteniendo métricas: {str(e)}")
@@ -40,6 +45,7 @@ class MonitoringDashboard:
     def generate_report(self, hours_back: int = 24) -> Dict[str, Any]:
         report = {
             'queues': self.get_queue_metrics(),
+            'redis_memory': self.get_queue_metrics()['memoria_redis'],
             'circuit_breakers': self.circuit_breaker_states,
             'timestamp': datetime.utcnow().isoformat(),
             'historical_metrics': {

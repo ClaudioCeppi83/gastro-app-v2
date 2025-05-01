@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from flask_jwt_extended import jwt_required
 from .monitoring import MonitoringDashboard
 import redis
 from flask_cors import CORS
@@ -11,6 +12,7 @@ redis_conn = redis.Redis(host='localhost', port=6379, db=0)
 dashboard = MonitoringDashboard(redis_conn)
 
 @monitoring_bp.route('/api/monitoring/report', methods=['GET'])
+@jwt_required()
 def get_monitoring_report():
     try:
         report = dashboard.generate_report()
@@ -19,6 +21,7 @@ def get_monitoring_report():
         return jsonify({'error': str(e)}), 500
 
 @monitoring_bp.route('/api/monitoring/history/<int:hours>', methods=['GET'])
+@jwt_required()
 def get_historical_metrics(hours):
     try:
         if hours < 1 or hours > 72:
