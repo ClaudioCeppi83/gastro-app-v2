@@ -1,0 +1,8 @@
+README.md
+setup.py
+src/gastroapp.egg-info/PKG-INFO
+src/gastroapp.egg-info/SOURCES.txt
+src/gastroapp.egg-info/dependency_links.txt
+src/gastroapp.egg-info/requires.txt
+src/gastroapp.egg-info/top_level.txt
+tests/test_api_integration.py
