@@ -3,8 +3,8 @@ from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
 class UnifiedLogger:
-    def __init__(self):
-        self.logger = logging.getLogger('POS_Logger')
+    def __init__(self, name='POS_Logger'):
+        self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
         
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -27,8 +27,8 @@ class UnifiedLogger:
         self.logger.error(f"Error en {context}: {str(error)}", exc_info=True)
 
 # Configuración inicial
-def setup_logging():
-    return UnifiedLogger()
+def setup_logger(name='POS_Logger'):
+    return UnifiedLogger(name)
 
 '''
 Ejemplo de uso:

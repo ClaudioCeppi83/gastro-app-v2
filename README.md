@@ -44,3 +44,11 @@ python manage.py runserver
 
 ## Diagrama de Arquitectura
 ![Arquitectura](docs/architecture.png)
+
+## Ejecución de pruebas
+
+1. Crear entorno virtual:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```

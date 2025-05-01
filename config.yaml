@@ -1,0 +1,12 @@
+airtable:
+  base_id: "gastroflow_db"  # ID de la base de datos de Airtable
+  api_key: "patAV1z9Y2VjOfW2C.9a1d23b7d3fdad31991008992031fbbd84cd54639882e41230aec751d6383d15"  # Clave API personal
+
+# Configuraciones generales
+logging:
+  level: "INFO"
+  path: "/logs"
+
+api:
+  timeout: 30
+  max_retries: 3
